@@ -164,4 +164,19 @@ export const api = {
     }
     return response.json();
   },
+
+  async cancelAppointment(id: string, message: string): Promise<ViewingRequest> {
+    const response = await fetch(`${API_BASE_URL}/viewing-requests/${id}/cancel`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message }),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to cancel appointment');
+    }
+    return response.json();
+  },
 }; 

@@ -112,6 +112,13 @@ export class RealitorStack extends cdk.Stack {
       handler: 'denyViewingRequest.handler',
     });
 
+    // Cancel Appointment Lambda
+    const cancelAppointmentFunction = new lambda.Function(this, 'CancelAppointmentFunction', {
+      ...commonLambdaProps,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
+      handler: 'cancelAppointment.handler',
+    });
+
     // Update Listing Lambda
     const updateListingFunction = new lambda.Function(this, 'UpdateListingFunction', {
       ...commonLambdaProps,
@@ -142,6 +149,7 @@ export class RealitorStack extends cdk.Stack {
     listingsTable.grantReadData(createViewingRequestFunction);
     listingsTable.grantReadData(approveViewingRequestFunction);
     listingsTable.grantReadData(denyViewingRequestFunction);
+    listingsTable.grantReadData(cancelAppointmentFunction);
 
     mediaBucket.grantReadWrite(uploadImageFunction);
 
@@ -149,11 +157,13 @@ export class RealitorStack extends cdk.Stack {
     viewingsTable.grantWriteData(createViewingRequestFunction);
     viewingsTable.grantReadWriteData(approveViewingRequestFunction);
     viewingsTable.grantReadWriteData(denyViewingRequestFunction);
+    viewingsTable.grantReadWriteData(cancelAppointmentFunction);
 
     mediaBucket.grantReadWrite(createListingFunction);
     notificationsTopic.grantPublish(createViewingRequestFunction);
     notificationsTopic.grantPublish(approveViewingRequestFunction);
     notificationsTopic.grantPublish(denyViewingRequestFunction);
+    notificationsTopic.grantPublish(cancelAppointmentFunction);
 
     // API Gateway
     const api = new apigateway.RestApi(this, 'RealitorApi', {
@@ -193,6 +203,9 @@ export class RealitorStack extends cdk.Stack {
     
     const denyViewingRequest = viewingRequest.addResource('deny');
     denyViewingRequest.addMethod('PUT', new apigateway.LambdaIntegration(denyViewingRequestFunction));
+    
+    const cancelAppointment = viewingRequest.addResource('cancel');
+    cancelAppointment.addMethod('PUT', new apigateway.LambdaIntegration(cancelAppointmentFunction));
 
     // Output the API Gateway URL
     new cdk.CfnOutput(this, 'ApiGatewayUrl', {

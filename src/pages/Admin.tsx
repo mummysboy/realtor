@@ -748,10 +748,22 @@ const Admin: React.FC = () => {
                               console.log('Reschedule appointment:', appointment.id, 'Message:', message);
                               alert(`Reschedule request sent with message: ${message}`);
                             }}
-                            onCancel={(message: string) => {
-                              // TODO: Implement cancel functionality with message
-                              console.log('Cancel appointment:', appointment.id, 'Message:', message);
-                              alert(`Cancel request sent with message: ${message}`);
+                            onCancel={async (message: string) => {
+                              try {
+                                await api.cancelAppointment(appointment.id, message);
+                                // Remove the appointment from the local state
+                                setViewingRequests(prev => 
+                                  prev.map(request => 
+                                    request.id === appointment.id 
+                                      ? { ...request, status: 'canceled' as const }
+                                      : request
+                                  )
+                                );
+                                alert('Appointment canceled successfully!');
+                              } catch (error) {
+                                console.error('Error canceling appointment:', error);
+                                alert('Failed to cancel appointment. Please try again.');
+                              }
                             }}
                           />
                         );

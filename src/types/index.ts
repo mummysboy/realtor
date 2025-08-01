@@ -21,7 +21,7 @@ export interface ViewingRequest {
   listingId: string;
   phone: string;
   timeSlot: string;
-  status: 'pending' | 'confirmed' | 'rejected';
+  status: 'pending' | 'confirmed' | 'rejected' | 'canceled';
   createdAt: string;
   updatedAt: string;
 }
