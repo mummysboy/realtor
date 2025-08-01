@@ -39,6 +39,11 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
     }
   };
 
+  const handleNoNotification = () => {
+    onConfirm(''); // Pass empty message to indicate no notification
+    onClose();
+  };
+
   const handleClose = () => {
     setMessage('');
     setShowMessageInput(false);
@@ -81,7 +86,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
 
         <div className="flex space-x-3">
           <button
-            onClick={handleClose}
+            onClick={showMessageInput ? handleClose : handleNoNotification}
             className="flex-1 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
           >
             {showMessageInput ? 'Cancel' : 'No'}

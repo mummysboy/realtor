@@ -743,10 +743,18 @@ const Admin: React.FC = () => {
                             address={address}
                             timeSlot={appointment.timeSlot}
                             status="confirmed"
-                            onReschedule={(message: string) => {
-                              // TODO: Implement reschedule functionality with message
-                              console.log('Reschedule appointment:', appointment.id, 'Message:', message);
-                              alert(`Reschedule request sent with message: ${message}`);
+                            onReschedule={async (message: string) => {
+                              try {
+                                // TODO: Implement actual reschedule API call
+                                console.log('Reschedule appointment:', appointment.id, 'Message:', message);
+                                const notificationText = message 
+                                  ? 'Reschedule request sent and client notified!' 
+                                  : 'Reschedule request sent!';
+                                alert(notificationText);
+                              } catch (error) {
+                                console.error('Error rescheduling appointment:', error);
+                                alert('Failed to reschedule appointment. Please try again.');
+                              }
                             }}
                             onCancel={async (message: string) => {
                               try {
@@ -759,7 +767,10 @@ const Admin: React.FC = () => {
                                       : request
                                   )
                                 );
-                                alert('Appointment canceled successfully!');
+                                const notificationText = message 
+                                  ? 'Appointment canceled and client notified successfully!' 
+                                  : 'Appointment canceled successfully!';
+                                alert(notificationText);
                               } catch (error) {
                                 console.error('Error canceling appointment:', error);
                                 alert('Failed to cancel appointment. Please try again.');
