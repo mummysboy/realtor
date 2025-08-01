@@ -18,6 +18,8 @@ export class RealitorStack extends cdk.Stack {
       versioned: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+      publicReadAccess: true,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,
       cors: [
         {
           allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT, s3.HttpMethods.POST],
@@ -48,7 +50,7 @@ export class RealitorStack extends cdk.Stack {
     });
 
     // Lambda Functions
-    const commonLambdaProps: lambda.FunctionProps = {
+    const commonLambdaProps = {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
       timeout: cdk.Duration.seconds(30),
@@ -64,51 +66,76 @@ export class RealitorStack extends cdk.Stack {
     // Get Listings Lambda
     const getListingsFunction = new lambda.Function(this, 'GetListingsFunction', {
       ...commonLambdaProps,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
       handler: 'getListings.handler',
     });
 
     // Get Listing by ID Lambda
     const getListingByIdFunction = new lambda.Function(this, 'GetListingByIdFunction', {
       ...commonLambdaProps,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
       handler: 'getListingById.handler',
     });
 
     // Create Listing Lambda
     const createListingFunction = new lambda.Function(this, 'CreateListingFunction', {
       ...commonLambdaProps,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
       handler: 'createListing.handler',
     });
 
     // Create Viewing Request Lambda
     const createViewingRequestFunction = new lambda.Function(this, 'CreateViewingRequestFunction', {
       ...commonLambdaProps,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
       handler: 'createViewingRequest.handler',
     });
 
     // Get Viewing Requests Lambda
     const getViewingRequestsFunction = new lambda.Function(this, 'GetViewingRequestsFunction', {
       ...commonLambdaProps,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
       handler: 'getViewingRequests.handler',
     });
 
     // Approve Viewing Request Lambda
     const approveViewingRequestFunction = new lambda.Function(this, 'ApproveViewingRequestFunction', {
       ...commonLambdaProps,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
       handler: 'approveViewingRequest.handler',
+    });
+
+    // Update Listing Lambda
+    const updateListingFunction = new lambda.Function(this, 'UpdateListingFunction', {
+      ...commonLambdaProps,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
+      handler: 'updateListing.handler',
+    });
+
+    // Delete Listing Lambda
+    const deleteListingFunction = new lambda.Function(this, 'DeleteListingFunction', {
+      ...commonLambdaProps,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
+      handler: 'deleteListing.handler',
+    });
+
+    // Upload Image Lambda
+    const uploadImageFunction = new lambda.Function(this, 'UploadImageFunction', {
+      ...commonLambdaProps,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
+      handler: 'uploadImage.handler',
     });
 
     // Grant permissions
     listingsTable.grantReadData(getListingsFunction);
     listingsTable.grantReadData(getListingByIdFunction);
     listingsTable.grantWriteData(createListingFunction);
+    listingsTable.grantReadWriteData(updateListingFunction);
+    listingsTable.grantReadWriteData(deleteListingFunction);
     listingsTable.grantReadData(createViewingRequestFunction);
     listingsTable.grantReadData(approveViewingRequestFunction);
+
+    mediaBucket.grantReadWrite(uploadImageFunction);
 
     viewingsTable.grantReadData(getViewingRequestsFunction);
     viewingsTable.grantWriteData(createViewingRequestFunction);
@@ -139,6 +166,12 @@ export class RealitorStack extends cdk.Stack {
 
     const listing = listings.addResource('{id}');
     listing.addMethod('GET', new apigateway.LambdaIntegration(getListingByIdFunction));
+    listing.addMethod('PUT', new apigateway.LambdaIntegration(updateListingFunction));
+    listing.addMethod('DELETE', new apigateway.LambdaIntegration(deleteListingFunction));
+
+    // Upload image endpoint
+    const uploadImage = api.root.addResource('upload-image');
+    uploadImage.addMethod('POST', new apigateway.LambdaIntegration(uploadImageFunction));
 
     // Viewing requests endpoints
     viewingRequests.addMethod('GET', new apigateway.LambdaIntegration(getViewingRequestsFunction));

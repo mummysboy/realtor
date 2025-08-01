@@ -15,6 +15,9 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
     }).format(price);
   };
 
+  // Debug logging
+  console.log('🖼️ Debug: Rendering image for listing:', listing.title, 'Image URL:', listing.images[0]);
+
   return (
     <Link 
       to={`/listing/${listing.id}`}
@@ -22,12 +25,16 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
     >
       <div className="relative">
         <img
-          src={listing.images[0] || '/placeholder-house.jpg'}
+          src={listing.images[0] || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'}
           alt={listing.title}
           className="w-full h-48 object-cover"
+          onLoad={() => {
+            console.log('🖼️ Debug: Image loaded successfully:', listing.images[0]);
+          }}
           onError={(e) => {
+            console.error('🖼️ Debug: Image failed to load:', listing.images[0]);
             const target = e.target as HTMLImageElement;
-            target.src = '/placeholder-house.jpg';
+            target.src = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800';
           }}
         />
         <div className="absolute top-2 right-2 bg-primary-600 text-white px-2 py-1 rounded text-sm font-medium">

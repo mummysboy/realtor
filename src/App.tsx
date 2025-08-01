@@ -9,7 +9,7 @@ import Success from './pages/Success';
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-grow pt-16">

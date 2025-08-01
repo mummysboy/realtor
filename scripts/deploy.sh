@@ -24,6 +24,12 @@ echo "📦 Installing dependencies..."
 # Install frontend dependencies
 npm install
 
+# Install and build Lambda functions
+cd lambda
+npm install
+npm run build
+cd ..
+
 # Install infrastructure dependencies
 cd infrastructure
 npm install

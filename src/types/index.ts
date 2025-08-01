@@ -37,7 +37,7 @@ export interface CreateListingRequest {
   city: string;
   state: string;
   zipCode: string;
-  images: File[];
+  images: string[];
   availableTimes: string[];
 }
 

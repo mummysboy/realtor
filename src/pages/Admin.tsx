@@ -11,8 +11,8 @@ const Admin: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Form state for creating listings
-  const [formData, setFormData] = useState<CreateListingRequest>({
+  // Form state for creating listings (with File objects for images)
+  const [formData, setFormData] = useState<Omit<CreateListingRequest, 'images'> & { images: File[] }>({
     title: '',
     description: '',
     rent: 0,
@@ -73,12 +73,46 @@ const Admin: React.FC = () => {
     }));
   };
 
+  const [editingListingId, setEditingListingId] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       setSubmitting(true);
-      await api.createListing(formData);
+      
+      // Upload images first
+      const imageUrls: string[] = [];
+      if (formData.images && formData.images.length > 0) {
+        console.log('📸 Processing', formData.images.length, 'images...');
+        for (const imageFile of formData.images) {
+          try {
+            const imageUrl = await api.uploadImage(imageFile);
+            imageUrls.push(imageUrl);
+            console.log('📸 Uploaded image:', imageUrl);
+          } catch (error) {
+            console.error('📸 Failed to upload image:', imageFile.name, error);
+            throw new Error(`Failed to upload image: ${imageFile.name}`);
+          }
+        }
+      }
+      
+      // Prepare listing data with image URLs
+      const listingData = {
+        ...formData,
+        images: imageUrls, // Replace File objects with URLs
+      };
+      
+      if (editingListingId) {
+        // Update existing listing
+        await api.updateListing(editingListingId, listingData);
+        alert('Listing updated successfully!');
+        setEditingListingId(null);
+      } else {
+        // Create new listing
+        await api.createListing(listingData);
+        alert('Listing created successfully!');
+      }
       
       // Reset form
       setFormData({
@@ -98,11 +132,9 @@ const Admin: React.FC = () => {
       
       // Refresh listings
       fetchListings();
-      
-      alert('Listing created successfully!');
     } catch (error) {
-      console.error('Error creating listing:', error);
-      alert('Failed to create listing. Please try again.');
+      console.error('Error saving listing:', error);
+      alert('Failed to save listing. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -134,6 +166,51 @@ const Admin: React.FC = () => {
     } catch (error) {
       console.error('Error denying request:', error);
       alert('Failed to deny request. Please try again.');
+    }
+  };
+
+  const handleEditListing = (listing: Listing) => {
+    // Populate the form with the listing data
+    setFormData({
+      title: listing.title,
+      description: listing.description,
+      rent: listing.rent,
+      bedrooms: listing.bedrooms,
+      bathrooms: listing.bathrooms,
+      sqft: listing.sqft,
+      address: listing.address,
+      city: listing.city,
+      state: listing.state,
+      zipCode: listing.zipCode,
+      images: [],
+      availableTimes: listing.availableTimes,
+    });
+    
+    // Set the editing listing ID
+    setEditingListingId(listing.id);
+    
+    // Switch to the create tab to show the form
+    setActiveTab('create');
+    
+    // Scroll to the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteListing = async (listingId: string) => {
+    if (!window.confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await api.deleteListing(listingId);
+      
+      // Remove the listing from the local state
+      setListings(prev => prev.filter(listing => listing.id !== listingId));
+      
+      alert('Listing deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+      alert('Failed to delete listing. Please try again.');
     }
   };
 
@@ -206,8 +283,12 @@ const Admin: React.FC = () => {
         {activeTab === 'create' && (
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-secondary-900 mb-2">Create New Listing</h2>
-              <p className="text-secondary-600">Add a new property to your portfolio</p>
+              <h2 className="text-xl font-bold text-secondary-900 mb-2">
+                {editingListingId ? 'Edit Listing' : 'Create New Listing'}
+              </h2>
+              <p className="text-secondary-600">
+                {editingListingId ? 'Update your property details' : 'Add a new property to your portfolio'}
+              </p>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -425,10 +506,10 @@ const Admin: React.FC = () => {
                 {submitting ? (
                   <div className="flex items-center justify-center">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
-                    Creating Listing...
+                    {editingListingId ? 'Updating Listing...' : 'Creating Listing...'}
                   </div>
                 ) : (
-                  'Create Listing'
+                  editingListingId ? 'Update Listing' : 'Create Listing'
                 )}
               </button>
             </form>
@@ -506,10 +587,16 @@ const Admin: React.FC = () => {
                         {/* Actions */}
                         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                           <div className="flex space-x-2">
-                            <button className="text-xs text-primary-600 hover:text-primary-800 font-semibold px-2 py-1.5 rounded-lg hover:bg-primary-50 transition-all border border-primary-200 hover:border-primary-300">
+                            <button 
+                              onClick={() => handleEditListing(listing)}
+                              className="text-xs text-primary-600 hover:text-primary-800 font-semibold px-2 py-1.5 rounded-lg hover:bg-primary-50 transition-all border border-primary-200 hover:border-primary-300"
+                            >
                               ✏️ Edit
                             </button>
-                            <button className="text-xs text-red-600 hover:text-red-800 font-semibold px-2 py-1.5 rounded-lg hover:bg-red-50 transition-all border border-red-200 hover:border-red-300">
+                            <button 
+                              onClick={() => handleDeleteListing(listing.id)}
+                              className="text-xs text-red-600 hover:text-red-800 font-semibold px-2 py-1.5 rounded-lg hover:bg-red-50 transition-all border border-red-200 hover:border-red-300"
+                            >
                               🗑️ Delete
                             </button>
                           </div>

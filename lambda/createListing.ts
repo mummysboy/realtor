@@ -53,6 +53,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       state,
       zipCode,
       availableTimes,
+      images,
     } = listingData;
 
     // Validate required fields
@@ -80,7 +81,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       city,
       state,
       zipCode,
-      images: [], // Will be populated after S3 upload
+      images: images && images.length > 0 ? images : [
+        'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800',
+        'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=800',
+        'https://images.unsplash.com/photo-1560448204-5f9c0b0b0b0b?w=800'
+      ],
       availableTimes: availableTimes || ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'],
       createdAt: now,
       updatedAt: now,
