@@ -11,8 +11,8 @@ const Admin: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Form state for creating listings (with File objects for images)
-  const [formData, setFormData] = useState<Omit<CreateListingRequest, 'images'> & { images: File[] }>({
+  // Form state for creating listings (with File objects and string URLs for images)
+  const [formData, setFormData] = useState<Omit<CreateListingRequest, 'images'> & { images: (File | string)[] }>({
     title: '',
     description: '',
     rent: 0,
@@ -66,7 +66,7 @@ const Admin: React.FC = () => {
     }));
   };
 
-  const handleImagesChange = (images: File[]) => {
+  const handleImagesChange = (images: (File | string)[]) => {
     setFormData(prev => ({
       ...prev,
       images
@@ -85,14 +85,21 @@ const Admin: React.FC = () => {
       const imageUrls: string[] = [];
       if (formData.images && formData.images.length > 0) {
         console.log('📸 Processing', formData.images.length, 'images...');
-        for (const imageFile of formData.images) {
-          try {
-            const imageUrl = await api.uploadImage(imageFile);
-            imageUrls.push(imageUrl);
-            console.log('📸 Uploaded image:', imageUrl);
-          } catch (error) {
-            console.error('📸 Failed to upload image:', imageFile.name, error);
-            throw new Error(`Failed to upload image: ${imageFile.name}`);
+        for (const imageItem of formData.images) {
+          if (typeof imageItem === 'string') {
+            // This is an existing image URL, keep it
+            imageUrls.push(imageItem);
+            console.log('📸 Keeping existing image:', imageItem);
+          } else {
+            // This is a new File, upload it
+            try {
+              const imageUrl = await api.uploadImage(imageItem);
+              imageUrls.push(imageUrl);
+              console.log('📸 Uploaded image:', imageUrl);
+            } catch (error) {
+              console.error('📸 Failed to upload image:', imageItem.name, error);
+              throw new Error(`Failed to upload image: ${imageItem.name}`);
+            }
           }
         }
       }
@@ -171,6 +178,7 @@ const Admin: React.FC = () => {
 
   const handleEditListing = (listing: Listing) => {
     // Populate the form with the listing data
+    // Include existing images as strings
     setFormData({
       title: listing.title,
       description: listing.description,
@@ -182,7 +190,7 @@ const Admin: React.FC = () => {
       city: listing.city,
       state: listing.state,
       zipCode: listing.zipCode,
-      images: [],
+      images: listing.images as (File | string)[], // Include existing images
       availableTimes: listing.availableTimes,
     });
     

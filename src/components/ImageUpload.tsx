@@ -1,8 +1,15 @@
 import React, { useState, useRef, useCallback } from 'react';
 
+interface ImageItem {
+  type: 'file' | 'url';
+  file?: File;
+  url?: string;
+  id: string;
+}
+
 interface ImageUploadProps {
-  images: File[];
-  onImagesChange: (images: File[]) => void;
+  images: (File | string)[];
+  onImagesChange: (images: (File | string)[]) => void;
   maxImages?: number;
 }
 
@@ -13,6 +20,23 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Convert images array to ImageItem array
+  const imageItems: ImageItem[] = images.map((image, index) => {
+    if (typeof image === 'string') {
+      return {
+        type: 'url',
+        url: image,
+        id: `url-${index}`,
+      };
+    } else {
+      return {
+        type: 'file',
+        file: image,
+        id: `file-${index}`,
+      };
+    }
+  });
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -145,9 +169,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       {/* Image Grid */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {images.map((image, index) => (
+          {imageItems.map((imageItem, index) => (
             <div
-              key={index}
+              key={imageItem.id}
               className="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden"
               draggable
               onDragStart={(e) => handleDragStart(e, index)}
@@ -155,9 +179,17 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               onDrop={(e) => handleDropOnImage(e, index)}
             >
               <img
-                src={URL.createObjectURL(image)}
-                alt={`Upload ${index + 1}`}
+                src={imageItem.type === 'file' 
+                  ? URL.createObjectURL(imageItem.file!) 
+                  : imageItem.url!
+                }
+                alt={`Image ${index + 1}`}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback for broken images
+                  const target = e.target as HTMLImageElement;
+                  target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlPC90ZXh0Pjwvc3ZnPg==';
+                }}
               />
               
               {/* Overlay with reorder indicator */}
@@ -184,6 +216,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               <div className="absolute bottom-2 left-2 w-6 h-6 bg-black bg-opacity-50 text-white text-xs rounded-full flex items-center justify-center">
                 {index + 1}
               </div>
+
+              {/* Existing image indicator */}
+              {imageItem.type === 'url' && (
+                <div className="absolute top-2 left-2 px-2 py-1 bg-blue-500 text-white text-xs rounded-full">
+                  Existing
+                </div>
+              )}
             </div>
           ))}
 
@@ -219,6 +258,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           <p>• Drag images to reorder them</p>
           <p>• First image will be the main photo</p>
           <p>• Tap the X to remove images</p>
+          <p>• Blue "Existing" badge shows current images</p>
         </div>
       )}
     </div>
