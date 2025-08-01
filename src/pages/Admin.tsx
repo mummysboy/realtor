@@ -160,15 +160,8 @@ const Admin: React.FC = () => {
 
   const handleDenyRequest = async (requestId: string) => {
     try {
-      // For now, we'll simulate denying by updating the status locally
-      // In a real app, you'd call an API to update the status
-      setViewingRequests(prev => 
-        prev.map(request => 
-          request.id === requestId 
-            ? { ...request, status: 'rejected' as const }
-            : request
-        )
-      );
+      await api.denyViewingRequest(requestId);
+      fetchViewingRequests(); // Refresh the list
       alert('Viewing request denied.');
     } catch (error) {
       console.error('Error denying request:', error);

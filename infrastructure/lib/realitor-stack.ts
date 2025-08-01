@@ -105,6 +105,13 @@ export class RealitorStack extends cdk.Stack {
       handler: 'approveViewingRequest.handler',
     });
 
+    // Deny Viewing Request Lambda
+    const denyViewingRequestFunction = new lambda.Function(this, 'DenyViewingRequestFunction', {
+      ...commonLambdaProps,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
+      handler: 'denyViewingRequest.handler',
+    });
+
     // Update Listing Lambda
     const updateListingFunction = new lambda.Function(this, 'UpdateListingFunction', {
       ...commonLambdaProps,
@@ -134,16 +141,19 @@ export class RealitorStack extends cdk.Stack {
     listingsTable.grantReadWriteData(deleteListingFunction);
     listingsTable.grantReadData(createViewingRequestFunction);
     listingsTable.grantReadData(approveViewingRequestFunction);
+    listingsTable.grantReadData(denyViewingRequestFunction);
 
     mediaBucket.grantReadWrite(uploadImageFunction);
 
     viewingsTable.grantReadData(getViewingRequestsFunction);
     viewingsTable.grantWriteData(createViewingRequestFunction);
     viewingsTable.grantReadWriteData(approveViewingRequestFunction);
+    viewingsTable.grantReadWriteData(denyViewingRequestFunction);
 
     mediaBucket.grantReadWrite(createListingFunction);
     notificationsTopic.grantPublish(createViewingRequestFunction);
     notificationsTopic.grantPublish(approveViewingRequestFunction);
+    notificationsTopic.grantPublish(denyViewingRequestFunction);
 
     // API Gateway
     const api = new apigateway.RestApi(this, 'RealitorApi', {
@@ -180,6 +190,9 @@ export class RealitorStack extends cdk.Stack {
     const viewingRequest = viewingRequests.addResource('{id}');
     const approveViewingRequest = viewingRequest.addResource('approve');
     approveViewingRequest.addMethod('PUT', new apigateway.LambdaIntegration(approveViewingRequestFunction));
+    
+    const denyViewingRequest = viewingRequest.addResource('deny');
+    denyViewingRequest.addMethod('PUT', new apigateway.LambdaIntegration(denyViewingRequestFunction));
 
     // Output the API Gateway URL
     new cdk.CfnOutput(this, 'ApiGatewayUrl', {
