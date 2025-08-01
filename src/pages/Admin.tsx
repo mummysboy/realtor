@@ -743,13 +743,15 @@ const Admin: React.FC = () => {
                             address={address}
                             timeSlot={appointment.timeSlot}
                             status="confirmed"
-                            onReschedule={() => {
-                              // TODO: Implement reschedule functionality
-                              console.log('Reschedule appointment:', appointment.id);
+                            onReschedule={(message: string) => {
+                              // TODO: Implement reschedule functionality with message
+                              console.log('Reschedule appointment:', appointment.id, 'Message:', message);
+                              alert(`Reschedule request sent with message: ${message}`);
                             }}
-                            onCancel={() => {
-                              // TODO: Implement cancel functionality
-                              console.log('Cancel appointment:', appointment.id);
+                            onCancel={(message: string) => {
+                              // TODO: Implement cancel functionality with message
+                              console.log('Cancel appointment:', appointment.id, 'Message:', message);
+                              alert(`Cancel request sent with message: ${message}`);
                             }}
                           />
                         );
