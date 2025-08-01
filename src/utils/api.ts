@@ -7,16 +7,16 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://your-api-gateway-
 const mockListings: Listing[] = [
   {
     id: 'listing-001',
-    title: 'Modern Downtown Apartment',
-    description: 'Beautiful 2-bedroom apartment in the heart of downtown. Features include hardwood floors, stainless steel appliances, and a private balcony with city views. Walking distance to restaurants, shopping, and public transportation.',
-    rent: 2200,
+    title: 'Modern Rothschild Apartment',
+    description: 'Beautiful 2-room apartment in the heart of Rothschild Boulevard. Features include hardwood floors, stainless steel appliances, and a private balcony with city views. Walking distance to restaurants, shopping, and public transportation.',
+    rent: 8500,
     bedrooms: 2,
     bathrooms: 1,
-    sqft: 950,
-    address: '123 Main Street',
-    city: 'New York',
-    state: 'NY',
-    zipCode: '10001',
+    sqft: 65,
+    address: '123 Rothschild Boulevard',
+    city: 'Tel Aviv',
+    state: 'Israel',
+    zipCode: '65132',
     images: [
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800',
       'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=800',
@@ -28,16 +28,16 @@ const mockListings: Listing[] = [
   },
   {
     id: 'listing-002',
-    title: 'Cozy Suburban House',
-    description: 'Charming 3-bedroom house in a quiet suburban neighborhood. Features a large backyard, updated kitchen, and finished basement. Perfect for families looking for space and comfort.',
-    rent: 2800,
-    bedrooms: 3,
-    bathrooms: 2,
-    sqft: 1400,
-    address: '456 Oak Avenue',
-    city: 'Los Angeles',
-    state: 'CA',
-    zipCode: '90210',
+    title: 'Cozy Neve Tzedek Studio',
+    description: 'Charming 1-room studio in the historic Neve Tzedek neighborhood. Features a large balcony, updated kitchen, and modern amenities. Perfect for young professionals seeking a trendy location.',
+    rent: 6500,
+    bedrooms: 1,
+    bathrooms: 1,
+    sqft: 45,
+    address: '456 Shabazi Street',
+    city: 'Tel Aviv',
+    state: 'Israel',
+    zipCode: '65132',
     images: [
       'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800',
       'https://images.unsplash.com/photo-1564013799919-ab600027ffc7?w=800',
@@ -49,16 +49,16 @@ const mockListings: Listing[] = [
   },
   {
     id: 'listing-003',
-    title: 'Luxury High-Rise Condo',
-    description: 'Stunning 1-bedroom condo in a luxury high-rise building. Features floor-to-ceiling windows, modern amenities, fitness center, and rooftop pool. Ideal for professionals seeking a premium lifestyle.',
-    rent: 3500,
-    bedrooms: 1,
-    bathrooms: 1,
-    sqft: 750,
-    address: '789 Park Avenue',
-    city: 'Chicago',
-    state: 'IL',
-    zipCode: '60601',
+    title: 'Luxury Sarona Loft',
+    description: 'Stunning 3-room loft in the upscale Sarona complex. Features floor-to-ceiling windows, modern amenities, fitness center access, and rooftop pool. Ideal for professionals seeking a premium lifestyle.',
+    rent: 12000,
+    bedrooms: 3,
+    bathrooms: 2,
+    sqft: 95,
+    address: '789 Sarona Street',
+    city: 'Tel Aviv',
+    state: 'Israel',
+    zipCode: '65234',
     images: [
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800',
       'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=800',
@@ -70,16 +70,16 @@ const mockListings: Listing[] = [
   },
   {
     id: 'listing-004',
-    title: 'Historic Townhouse',
-    description: 'Beautifully restored 4-bedroom townhouse with original architectural details. Features include exposed brick walls, high ceilings, and a private garden. Located in a historic district with easy access to downtown.',
-    rent: 4200,
+    title: 'Historic Jaffa Apartment',
+    description: 'Beautifully restored 4-room apartment with original architectural details in the historic Jaffa port area. Features include exposed stone walls, high ceilings, and a private terrace. Located in a historic district with easy access to the beach.',
+    rent: 9500,
     bedrooms: 4,
-    bathrooms: 2.5,
-    sqft: 1800,
-    address: '321 Elm Street',
-    city: 'Boston',
-    state: 'MA',
-    zipCode: '02101',
+    bathrooms: 2,
+    sqft: 120,
+    address: '321 Yefet Street',
+    city: 'Tel Aviv',
+    state: 'Israel',
+    zipCode: '68036',
     images: [
       'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800',
       'https://images.unsplash.com/photo-1564013799919-ab600027ffc7?w=800',
@@ -91,16 +91,16 @@ const mockListings: Listing[] = [
   },
   {
     id: 'listing-005',
-    title: 'Studio Loft',
-    description: 'Modern studio loft with open floor plan and industrial design. Features high ceilings, large windows, and built-in storage. Perfect for young professionals or students.',
-    rent: 1500,
-    bedrooms: 0,
+    title: 'Beachfront Studio',
+    description: 'Modern studio apartment with open floor plan and beach views. Features high ceilings, large windows, and built-in storage. Perfect for young professionals or students. Located just steps from the Mediterranean Sea.',
+    rent: 7500,
+    bedrooms: 1,
     bathrooms: 1,
-    sqft: 500,
-    address: '654 Pine Street',
-    city: 'San Francisco',
-    state: 'CA',
-    zipCode: '94102',
+    sqft: 35,
+    address: '654 Ben Yehuda Street',
+    city: 'Tel Aviv',
+    state: 'Israel',
+    zipCode: '63405',
     images: [
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800',
       'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=800',
@@ -109,6 +109,82 @@ const mockListings: Listing[] = [
     availableTimes: ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'],
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
+  },
+];
+
+// Mock viewing requests data
+const mockViewingRequests: ViewingRequest[] = [
+  {
+    id: 'request-001',
+    listingId: 'listing-001',
+    phone: '(555) 123-4567',
+    timeSlot: '10:00 AM',
+    status: 'pending',
+    createdAt: '2024-01-15T10:30:00.000Z',
+    updatedAt: '2024-01-15T10:30:00.000Z',
+  },
+  {
+    id: 'request-002',
+    listingId: 'listing-002',
+    phone: '(555) 234-5678',
+    timeSlot: '2:00 PM',
+    status: 'confirmed',
+    createdAt: '2024-01-14T14:20:00.000Z',
+    updatedAt: '2024-01-14T16:45:00.000Z',
+  },
+  {
+    id: 'request-003',
+    listingId: 'listing-003',
+    phone: '(555) 345-6789',
+    timeSlot: '11:00 AM',
+    status: 'pending',
+    createdAt: '2024-01-15T09:15:00.000Z',
+    updatedAt: '2024-01-15T09:15:00.000Z',
+  },
+  {
+    id: 'request-004',
+    listingId: 'listing-001',
+    phone: '(555) 456-7890',
+    timeSlot: '3:00 PM',
+    status: 'confirmed',
+    createdAt: '2024-01-13T11:00:00.000Z',
+    updatedAt: '2024-01-13T15:30:00.000Z',
+  },
+  {
+    id: 'request-005',
+    listingId: 'listing-004',
+    phone: '(555) 567-8901',
+    timeSlot: '9:00 AM',
+    status: 'confirmed',
+    createdAt: '2024-01-12T08:45:00.000Z',
+    updatedAt: '2024-01-12T10:20:00.000Z',
+  },
+  {
+    id: 'request-006',
+    listingId: 'listing-005',
+    phone: '(555) 678-9012',
+    timeSlot: '4:00 PM',
+    status: 'pending',
+    createdAt: '2024-01-15T13:30:00.000Z',
+    updatedAt: '2024-01-15T13:30:00.000Z',
+  },
+  {
+    id: 'request-007',
+    listingId: 'listing-002',
+    phone: '(555) 789-0123',
+    timeSlot: '10:00 AM',
+    status: 'confirmed',
+    createdAt: '2024-01-11T16:20:00.000Z',
+    updatedAt: '2024-01-11T18:15:00.000Z',
+  },
+  {
+    id: 'request-008',
+    listingId: 'listing-003',
+    phone: '(555) 890-1234',
+    timeSlot: '2:00 PM',
+    status: 'pending',
+    createdAt: '2024-01-15T12:00:00.000Z',
+    updatedAt: '2024-01-15T12:00:00.000Z',
   },
 ];
 
@@ -209,6 +285,13 @@ export const api = {
   },
 
   async getViewingRequests(): Promise<ViewingRequest[]> {
+    // For local development, return mock data
+    if (!process.env.REACT_APP_API_URL) {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(mockViewingRequests), 500); // Simulate network delay
+      });
+    }
+
     const response = await fetch(`${API_BASE_URL}/viewing-requests`);
     if (!response.ok) {
       throw new Error('Failed to fetch viewing requests');
@@ -217,6 +300,18 @@ export const api = {
   },
 
   async approveViewingRequest(id: string): Promise<ViewingRequest> {
+    // For local development, simulate approval
+    if (!process.env.REACT_APP_API_URL) {
+      const request = mockViewingRequests.find(r => r.id === id);
+      if (request) {
+        request.status = 'confirmed';
+        request.updatedAt = new Date().toISOString();
+      }
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(request || mockViewingRequests[0]), 500);
+      });
+    }
+
     const response = await fetch(`${API_BASE_URL}/viewing-requests/${id}/approve`, {
       method: 'PUT',
     });

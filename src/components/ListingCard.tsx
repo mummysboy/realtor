@@ -45,24 +45,18 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
         </p>
         
         <div className="flex items-center justify-between text-sm text-gray-500">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 text-sm text-gray-600">
             <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {listing.bedrooms} bed
+              <span className="mr-1">🛏️</span>
+              {listing.bedrooms} room{listing.bedrooms !== 1 ? 's' : ''}
             </span>
             <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <span className="mr-1">🚿</span>
               {listing.bathrooms} bath
             </span>
             <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {listing.sqft} sqft
+              <span className="mr-1">📏</span>
+              {listing.sqft} sqm
             </span>
           </div>
           
