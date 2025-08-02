@@ -3,6 +3,8 @@ import { Listing, ViewingRequest, CreateListingRequest, CreateViewingRequestRequ
 import { api } from '../utils/api';
 import ImageUpload from '../components/ImageUpload';
 import AppointmentCard from '../components/AppointmentCard';
+import TranslatableTextarea from '../components/TranslatableTextarea';
+import TranslatableInput from '../components/TranslatableInput';
 
 const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'requests' | 'schedule'>('create');
@@ -10,6 +12,8 @@ const Admin: React.FC = () => {
   const [viewingRequests, setViewingRequests] = useState<ViewingRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   // Form state for creating listings (with File objects and string URLs for images)
   const [formData, setFormData] = useState<Omit<CreateListingRequest, 'images'> & { images: (File | string)[] }>({
@@ -31,6 +35,25 @@ const Admin: React.FC = () => {
     fetchListings();
     fetchViewingRequests();
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down and past initial 100px
+        setIsHeaderVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up
+        setIsHeaderVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   const fetchListings = async () => {
     try {
@@ -115,30 +138,52 @@ const Admin: React.FC = () => {
         await api.updateListing(editingListingId, listingData);
         alert('Listing updated successfully!');
         setEditingListingId(null);
+        
+        // Reset form
+        setFormData({
+          title: '',
+          description: '',
+          rent: 0,
+          bedrooms: 1,
+          bathrooms: 1,
+          sqft: 0,
+          address: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          images: [],
+          availableTimes: ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'],
+        });
+        
+        // Switch back to manage tab
+        setActiveTab('manage');
+        
+        // Refresh listings
+        fetchListings();
       } else {
         // Create new listing
         await api.createListing(listingData);
         alert('Listing created successfully!');
+        
+        // Reset form
+        setFormData({
+          title: '',
+          description: '',
+          rent: 0,
+          bedrooms: 1,
+          bathrooms: 1,
+          sqft: 0,
+          address: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          images: [],
+          availableTimes: ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'],
+        });
+        
+        // Refresh listings
+        fetchListings();
       }
-      
-      // Reset form
-      setFormData({
-        title: '',
-        description: '',
-        rent: 0,
-        bedrooms: 1,
-        bathrooms: 1,
-        sqft: 0,
-        address: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        images: [],
-        availableTimes: ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'],
-      });
-      
-      // Refresh listings
-      fetchListings();
     } catch (error) {
       console.error('Error saving listing:', error);
       alert('Failed to save listing. Please try again.');
@@ -215,6 +260,8 @@ const Admin: React.FC = () => {
     }
   };
 
+
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -248,12 +295,22 @@ const Admin: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-secondary-900 mb-2">Admin Dashboard</h1>
-          <p className="text-secondary-600">Manage listings and viewing requests</p>
+      {/* Header with toggle functionality */}
+      <div className={`bg-white/80 backdrop-blur-md border-b border-secondary-200 fixed top-0 left-0 right-0 z-20 transition-transform duration-300 ${
+        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-secondary-900 mb-2">Admin Dashboard</h1>
+            <p className="text-secondary-600">Manage listings and viewing requests</p>
+          </div>
         </div>
+      </div>
+
+      {/* Spacer for fixed header */}
+      <div className="h-32"></div>
+
+      <div className="max-w-7xl mx-auto px-4 py-4">
 
         {/* Mobile Tab Navigation */}
         <div className="bg-white rounded-2xl shadow-lg border border-secondary-200 mb-6">
@@ -302,15 +359,13 @@ const Admin: React.FC = () => {
                     <label htmlFor="title" className="block text-sm font-medium text-secondary-700 mb-2">
                       Property Title
                     </label>
-                    <input
-                      type="text"
+                    <TranslatableInput
                       id="title"
                       name="title"
                       value={formData.title}
-                      onChange={handleInputChange}
+                      onChange={(value) => setFormData(prev => ({ ...prev, title: value }))}
+                      placeholder="Modern Downtown Apartment (Type in Hebrew to see translate button)"
                       required
-                      className="w-full px-4 py-3 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                      placeholder="Modern Downtown Apartment"
                     />
                   </div>
 
@@ -396,15 +451,13 @@ const Admin: React.FC = () => {
                     <label htmlFor="address" className="block text-sm font-medium text-secondary-700 mb-2">
                       Street Address
                     </label>
-                    <input
-                      type="text"
+                    <TranslatableInput
                       id="address"
                       name="address"
                       value={formData.address}
-                      onChange={handleInputChange}
+                      onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
+                      placeholder="123 Main Street (Type in Hebrew to see translate button)"
                       required
-                      className="w-full px-4 py-3 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                      placeholder="123 Main Street"
                     />
                   </div>
 
@@ -413,15 +466,13 @@ const Admin: React.FC = () => {
                       <label htmlFor="city" className="block text-sm font-medium text-secondary-700 mb-2">
                         City
                       </label>
-                      <input
-                        type="text"
+                      <TranslatableInput
                         id="city"
                         name="city"
                         value={formData.city}
-                        onChange={handleInputChange}
+                        onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
+                        placeholder="New York (Type in Hebrew to see translate button)"
                         required
-                        className="w-full px-4 py-3 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                        placeholder="New York"
                       />
                     </div>
 
@@ -429,15 +480,13 @@ const Admin: React.FC = () => {
                       <label htmlFor="state" className="block text-sm font-medium text-secondary-700 mb-2">
                         State
                       </label>
-                      <input
-                        type="text"
+                      <TranslatableInput
                         id="state"
                         name="state"
                         value={formData.state}
-                        onChange={handleInputChange}
+                        onChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
+                        placeholder="NY (Type in Hebrew to see translate button)"
                         required
-                        className="w-full px-4 py-3 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                        placeholder="NY"
                       />
                     </div>
 
@@ -445,15 +494,13 @@ const Admin: React.FC = () => {
                       <label htmlFor="zipCode" className="block text-sm font-medium text-secondary-700 mb-2">
                         ZIP Code
                       </label>
-                      <input
-                        type="text"
+                      <TranslatableInput
                         id="zipCode"
                         name="zipCode"
                         value={formData.zipCode}
-                        onChange={handleInputChange}
+                        onChange={(value) => setFormData(prev => ({ ...prev, zipCode: value }))}
+                        placeholder="10001 (Type in Hebrew to see translate button)"
                         required
-                        className="w-full px-4 py-3 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                        placeholder="10001"
                       />
                     </div>
                   </div>
@@ -468,15 +515,12 @@ const Admin: React.FC = () => {
                   <label htmlFor="description" className="block text-sm font-medium text-secondary-700 mb-2">
                     Property Description
                   </label>
-                  <textarea
-                    id="description"
-                    name="description"
+                  <TranslatableTextarea
                     value={formData.description}
-                    onChange={handleInputChange}
-                    required
+                    onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                    placeholder="Describe the property features, amenities, and highlights... (Type in Hebrew to see translate button)"
                     rows={4}
-                    className="w-full px-4 py-3 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all resize-none"
-                    placeholder="Describe the property features, amenities, and highlights..."
+                    required
                   />
                 </div>
               </div>
@@ -594,6 +638,7 @@ const Admin: React.FC = () => {
                             >
                               ✏️ Edit
                             </button>
+
                             <button 
                               onClick={() => handleDeleteListing(listing.id)}
                               className="text-xs text-red-600 hover:text-red-800 font-semibold px-2 py-1.5 rounded-lg hover:bg-red-50 transition-all border border-red-200 hover:border-red-300"

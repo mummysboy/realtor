@@ -14,8 +14,6 @@ const Home: React.FC = () => {
     bedrooms: '',
     bathrooms: ''
   });
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState<{[key: string]: boolean}>({});
@@ -38,25 +36,6 @@ const Home: React.FC = () => {
 
     fetchListings();
   }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolling down and past initial 100px
-        setIsHeaderVisible(false);
-      } else if (currentScrollY <= 50) {
-        // Only show header when scrolled all the way to the top (within 50px)
-        setIsHeaderVisible(true);
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
 
   const formatPrice = (price: number) => {
     try {
@@ -185,9 +164,7 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
       {/* Header */}
-      <div className={`bg-white/80 backdrop-blur-md border-b border-secondary-200 fixed top-0 left-0 right-0 z-20 transition-transform duration-300 ${
-        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}>
+      <div className="bg-white/80 backdrop-blur-md border-b border-secondary-200 fixed top-0 left-0 right-0 z-20 transition-transform duration-300 translate-y-0">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-secondary-900 mb-2">Find Your Perfect Home</h1>

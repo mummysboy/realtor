@@ -119,6 +119,8 @@ export class RealitorStack extends cdk.Stack {
       handler: 'cancelAppointment.handler',
     });
 
+
+
     // Update Listing Lambda
     const updateListingFunction = new lambda.Function(this, 'UpdateListingFunction', {
       ...commonLambdaProps,
@@ -163,7 +165,6 @@ export class RealitorStack extends cdk.Stack {
     notificationsTopic.grantPublish(createViewingRequestFunction);
     notificationsTopic.grantPublish(approveViewingRequestFunction);
     notificationsTopic.grantPublish(denyViewingRequestFunction);
-    notificationsTopic.grantPublish(cancelAppointmentFunction);
 
     // API Gateway
     const api = new apigateway.RestApi(this, 'RealitorApi', {
@@ -206,6 +207,8 @@ export class RealitorStack extends cdk.Stack {
     
     const cancelAppointment = viewingRequest.addResource('cancel');
     cancelAppointment.addMethod('PUT', new apigateway.LambdaIntegration(cancelAppointmentFunction));
+
+
 
     // Output the API Gateway URL
     new cdk.CfnOutput(this, 'ApiGatewayUrl', {

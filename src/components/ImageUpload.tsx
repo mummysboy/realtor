@@ -212,17 +212,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 </svg>
               </button>
 
-              {/* Image number */}
-              <div className="absolute bottom-2 left-2 w-6 h-6 bg-black bg-opacity-50 text-white text-xs rounded-full flex items-center justify-center">
-                {index + 1}
-              </div>
 
-              {/* Existing image indicator */}
-              {imageItem.type === 'url' && (
-                <div className="absolute top-2 left-2 px-2 py-1 bg-blue-500 text-white text-xs rounded-full">
-                  Existing
-                </div>
-              )}
+
+
             </div>
           ))}
 
@@ -258,7 +250,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           <p>• Drag images to reorder them</p>
           <p>• First image will be the main photo</p>
           <p>• Tap the X to remove images</p>
-          <p>• Blue "Existing" badge shows current images</p>
         </div>
       )}
     </div>
