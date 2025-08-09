@@ -1,42 +1,25 @@
-const API_KEY = process.env.REACT_APP_OPENAI_API_KEY || '';
+import { api } from './api';
 
 export const translateText = async (text: string): Promise<string> => {
-  if (!API_KEY) {
-    throw new Error('OpenAI API key not configured');
+  if (!text || text.trim().length === 0) {
+    throw new Error('Text is required for translation');
+  }
+
+  // Check text length limit
+  if (text.length > 5000) {
+    throw new Error('Text too long. Maximum 5000 characters allowed.');
   }
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a professional real estate translator. Translate the following Hebrew real estate listing description to professional, natural English. Maintain the same tone and style as the original. Format the response as a clean English translation without any additional commentary or formatting.`
-          },
-          {
-            role: 'user',
-            content: text
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.3,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Translation failed');
-    }
-
-    const data = await response.json();
-    return data.choices[0].message.content.trim();
+    return await api.translateText(text.trim());
   } catch (error) {
     console.error('Translation error:', error);
-    throw new Error('Failed to translate text');
+    
+    // Provide user-friendly error messages
+    if (error instanceof Error) {
+      throw error;
+    } else {
+      throw new Error('Failed to translate text. Please check your connection and try again.');
+    }
   }
 }; 

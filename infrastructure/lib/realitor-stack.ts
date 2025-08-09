@@ -6,6 +6,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as path from 'path';
 
 export class RealitorStack extends cdk.Stack {
@@ -49,6 +50,11 @@ export class RealitorStack extends cdk.Stack {
       topicName: 'realitor-notifications',
     });
 
+    // Reference OpenAI API Key parameter from Parameter Store
+    // The parameter should already be created manually:
+    // aws ssm put-parameter --name "/realitor/openai/api-key" --value "your-openai-api-key" --type "SecureString"
+    const openaiApiKeyParameterName = '/realitor/openai/api-key';
+
     // Lambda Functions
     const commonLambdaProps = {
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -60,6 +66,7 @@ export class RealitorStack extends cdk.Stack {
         VIEWINGS_TABLE_NAME: viewingsTable.tableName,
         S3_BUCKET_NAME: mediaBucket.bucketName,
         SNS_TOPIC_ARN: notificationsTopic.topicArn,
+        OPENAI_API_KEY_PARAMETER_NAME: openaiApiKeyParameterName,
       },
     };
 
@@ -142,6 +149,13 @@ export class RealitorStack extends cdk.Stack {
       handler: 'uploadImage.handler',
     });
 
+    // Translate Text Lambda
+    const translateTextFunction = new lambda.Function(this, 'TranslateTextFunction', {
+      ...commonLambdaProps,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
+      handler: 'translateText.handler',
+    });
+
     // Grant permissions
     listingsTable.grantReadData(getListingsFunction);
     listingsTable.grantReadData(getListingByIdFunction);
@@ -165,6 +179,31 @@ export class RealitorStack extends cdk.Stack {
     notificationsTopic.grantPublish(createViewingRequestFunction);
     notificationsTopic.grantPublish(approveViewingRequestFunction);
     notificationsTopic.grantPublish(denyViewingRequestFunction);
+
+    // Grant Lambda functions permission to read OpenAI API key from Parameter Store
+    const lambdaFunctions = [
+      getListingsFunction,
+      getListingByIdFunction,
+      createListingFunction,
+      createViewingRequestFunction,
+      getViewingRequestsFunction,
+      approveViewingRequestFunction,
+      denyViewingRequestFunction,
+      cancelAppointmentFunction,
+      updateListingFunction,
+      deleteListingFunction,
+      uploadImageFunction,
+      translateTextFunction
+    ];
+
+    // Grant Lambda functions permission to read OpenAI API key parameter
+    lambdaFunctions.forEach(func => {
+      func.addToRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['ssm:GetParameter'],
+        resources: [`arn:aws:ssm:${this.region}:${this.account}:parameter${openaiApiKeyParameterName}`]
+      }));
+    });
 
     // API Gateway
     const api = new apigateway.RestApi(this, 'RealitorApi', {
@@ -193,6 +232,10 @@ export class RealitorStack extends cdk.Stack {
     // Upload image endpoint
     const uploadImage = api.root.addResource('upload-image');
     uploadImage.addMethod('POST', new apigateway.LambdaIntegration(uploadImageFunction));
+
+    // Translate text endpoint
+    const translate = api.root.addResource('translate');
+    translate.addMethod('POST', new apigateway.LambdaIntegration(translateTextFunction));
 
     // Viewing requests endpoints
     viewingRequests.addMethod('GET', new apigateway.LambdaIntegration(getViewingRequestsFunction));
