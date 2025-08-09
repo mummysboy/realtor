@@ -364,7 +364,7 @@ const Admin: React.FC = () => {
                       name="title"
                       value={formData.title}
                       onChange={(value) => setFormData(prev => ({ ...prev, title: value }))}
-                      placeholder="Modern Downtown Apartment (Type in Hebrew to see translate button)"
+                      placeholder="Modern Downtown Apartment"
                       required
                     />
                   </div>
@@ -456,7 +456,7 @@ const Admin: React.FC = () => {
                       name="address"
                       value={formData.address}
                       onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
-                      placeholder="123 Main Street (Type in Hebrew to see translate button)"
+                      placeholder="123 Main Street"
                       required
                     />
                   </div>
@@ -471,7 +471,7 @@ const Admin: React.FC = () => {
                         name="city"
                         value={formData.city}
                         onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
-                        placeholder="New York (Type in Hebrew to see translate button)"
+                        placeholder="New York"
                         required
                       />
                     </div>
@@ -485,7 +485,7 @@ const Admin: React.FC = () => {
                         name="state"
                         value={formData.state}
                         onChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
-                        placeholder="NY (Type in Hebrew to see translate button)"
+                        placeholder="NY"
                         required
                       />
                     </div>
@@ -499,7 +499,7 @@ const Admin: React.FC = () => {
                         name="zipCode"
                         value={formData.zipCode}
                         onChange={(value) => setFormData(prev => ({ ...prev, zipCode: value }))}
-                        placeholder="10001 (Type in Hebrew to see translate button)"
+                        placeholder="10001"
                         required
                       />
                     </div>
@@ -518,7 +518,7 @@ const Admin: React.FC = () => {
                   <TranslatableTextarea
                     value={formData.description}
                     onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
-                    placeholder="Describe the property features, amenities, and highlights... (Type in Hebrew to see translate button)"
+                    placeholder="Describe the property features, amenities, and highlights..."
                     rows={4}
                     required
                   />
