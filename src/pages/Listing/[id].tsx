@@ -198,8 +198,12 @@ const ListingDetail: React.FC = () => {
               
               <div className="flex items-center space-x-6 mb-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-600">{listing.bedrooms}</div>
-                  <div className="text-xs text-secondary-500">Bedrooms</div>
+                  <div className="text-2xl font-bold text-primary-600">
+                    {listing.bedrooms === 0 ? 'Studio' : listing.bedrooms}
+                  </div>
+                  <div className="text-xs text-secondary-500">
+                    {listing.bedrooms === 0 ? 'Apartment' : 'Bedrooms'}
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary-600">{listing.bathrooms}</div>

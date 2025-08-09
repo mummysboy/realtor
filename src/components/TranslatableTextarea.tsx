@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { translateText } from '../utils/translation';
+import { api } from '../utils/api';
 
 interface TranslatableTextareaProps {
   value: string;
@@ -19,7 +20,9 @@ const TranslatableTextarea: React.FC<TranslatableTextareaProps> = ({
   required = false,
 }) => {
   const [showTranslateButton, setShowTranslateButton] = useState(false);
+  const [showEnhanceButton, setShowEnhanceButton] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Check if text contains Hebrew characters
@@ -28,11 +31,27 @@ const TranslatableTextarea: React.FC<TranslatableTextareaProps> = ({
     return hebrewRegex.test(text);
   };
 
-  // Update translate button visibility
+  // Check if text is primarily English (basic detection)
+  const isEnglishText = (text: string) => {
+    const trimmedText = text.trim();
+    if (trimmedText.length < 10) return false; // Need minimum content for enhancement
+    
+    // Check if text contains mostly English characters and no Hebrew
+    const englishRegex = /^[a-zA-Z0-9\s.,!?'"()-]+$/;
+    const hasBasicEnglish = /[a-zA-Z]/.test(trimmedText);
+    const noHebrew = !containsHebrew(trimmedText);
+    
+    return hasBasicEnglish && noHebrew && trimmedText.length >= 10;
+  };
+
+  // Update button visibility
   useEffect(() => {
     const hasHebrew = containsHebrew(value);
+    const isEnglish = isEnglishText(value);
     const hasContent = value.trim().length > 0;
+    
     setShowTranslateButton(hasHebrew && hasContent);
+    setShowEnhanceButton(isEnglish && hasContent && !hasHebrew);
   }, [value]);
 
   const handleTranslate = async () => {
@@ -60,6 +79,29 @@ const TranslatableTextarea: React.FC<TranslatableTextareaProps> = ({
     }
   };
 
+  const handleEnhance = async () => {
+    if (!value.trim() || isEnhancing) return;
+
+    try {
+      setIsEnhancing(true);
+      const enhancedText = await api.enhanceDescription(value, 'property');
+      
+      // Replace the existing text with the enhanced version
+      onChange(enhancedText);
+      
+      // Focus back on the textarea
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(enhancedText.length, enhancedText.length);
+      }
+    } catch (error) {
+      console.error('Enhancement failed:', error);
+      alert('Enhancement failed. Please try again.');
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
+
   return (
     <div className="relative">
       <textarea
@@ -72,6 +114,7 @@ const TranslatableTextarea: React.FC<TranslatableTextareaProps> = ({
         className={`w-full px-4 py-3 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all resize-none ${className}`}
       />
       
+      {/* Translate Button (for Hebrew text) */}
       {showTranslateButton && (
         <button
           type="button"
@@ -94,6 +137,34 @@ const TranslatableTextarea: React.FC<TranslatableTextareaProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
               </svg>
               Translate
+            </div>
+          )}
+        </button>
+      )}
+
+      {/* Enhance Button (for English text) */}
+      {showEnhanceButton && (
+        <button
+          type="button"
+          onClick={handleEnhance}
+          disabled={isEnhancing}
+          className={`absolute top-3 right-3 px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+            isEnhancing
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-sm hover:shadow-md'
+          }`}
+        >
+          {isEnhancing ? (
+            <div className="flex items-center">
+              <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin mr-1"></div>
+              Enhancing...
+            </div>
+          ) : (
+            <div className="flex items-center">
+              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              Enhance with AI
             </div>
           )}
         </button>

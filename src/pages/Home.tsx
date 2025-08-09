@@ -110,7 +110,8 @@ const Home: React.FC = () => {
       const matchesPrice = (!selectedFilters.minPrice || listing.rent >= parseInt(selectedFilters.minPrice)) &&
                           (!selectedFilters.maxPrice || listing.rent <= parseInt(selectedFilters.maxPrice));
       
-      const matchesBedrooms = !selectedFilters.bedrooms || listing.bedrooms >= parseInt(selectedFilters.bedrooms);
+      const matchesBedrooms = !selectedFilters.bedrooms || 
+        (selectedFilters.bedrooms === '0' ? listing.bedrooms === 0 : listing.bedrooms >= parseInt(selectedFilters.bedrooms));
       const matchesBathrooms = !selectedFilters.bathrooms || listing.bathrooms >= parseInt(selectedFilters.bathrooms);
       
       return matchesSearch && matchesPrice && matchesBedrooms && matchesBathrooms;
@@ -221,6 +222,7 @@ const Home: React.FC = () => {
                 className="px-4 py-2 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
               >
                 <option value="">Rooms</option>
+                <option value="0">Studio</option>
                 <option value="1">1+ Room</option>
                 <option value="2">2+ Rooms</option>
                 <option value="3">3+ Rooms</option>
@@ -297,7 +299,7 @@ const Home: React.FC = () => {
                   <div className="flex items-center space-x-4">
                     <span className="flex items-center text-secondary-500">
                       <span className="mr-1">🛏️</span>
-                      {listing.bedrooms} room{listing.bedrooms !== 1 ? 's' : ''}
+{listing.bedrooms === 0 ? 'Studio' : `${listing.bedrooms} room${listing.bedrooms !== 1 ? 's' : ''}`}
                     </span>
                     <span className="flex items-center text-secondary-500">
                       <span className="mr-1">🚿</span>

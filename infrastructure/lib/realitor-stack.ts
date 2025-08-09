@@ -156,6 +156,15 @@ export class RealitorStack extends cdk.Stack {
       handler: 'translateText.handler',
     });
 
+    // Enhance Description Lambda
+    const enhanceDescriptionFunction = new lambda.Function(this, 'EnhanceDescriptionFunction', {
+      ...commonLambdaProps,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../lambda/dist')),
+      handler: 'enhanceDescription.handler',
+    });
+
+
+
     // Grant permissions
     listingsTable.grantReadData(getListingsFunction);
     listingsTable.grantReadData(getListingByIdFunction);
@@ -193,7 +202,8 @@ export class RealitorStack extends cdk.Stack {
       updateListingFunction,
       deleteListingFunction,
       uploadImageFunction,
-      translateTextFunction
+      translateTextFunction,
+      enhanceDescriptionFunction
     ];
 
     // Grant Lambda functions permission to read OpenAI API key parameter
@@ -236,6 +246,12 @@ export class RealitorStack extends cdk.Stack {
     // Translate text endpoint
     const translate = api.root.addResource('translate');
     translate.addMethod('POST', new apigateway.LambdaIntegration(translateTextFunction));
+
+    // Enhance description endpoint
+    const enhanceDescription = api.root.addResource('enhance-description');
+    enhanceDescription.addMethod('POST', new apigateway.LambdaIntegration(enhanceDescriptionFunction));
+
+
 
     // Viewing requests endpoints
     viewingRequests.addMethod('GET', new apigateway.LambdaIntegration(getViewingRequestsFunction));

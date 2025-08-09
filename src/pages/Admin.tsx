@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Listing, ViewingRequest, CreateListingRequest, CreateViewingRequestRequest } from '../types';
+import { Listing, ViewingRequest, CreateListingRequest } from '../types';
 import { api } from '../utils/api';
 import ImageUpload from '../components/ImageUpload';
 import AppointmentCard from '../components/AppointmentCard';
@@ -12,15 +12,16 @@ const Admin: React.FC = () => {
   const [viewingRequests, setViewingRequests] = useState<ViewingRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
   // Form state for creating listings (with File objects and string URLs for images)
-  const [formData, setFormData] = useState<Omit<CreateListingRequest, 'images'> & { images: (File | string)[] }>({
+  const [formData, setFormData] = useState<Omit<CreateListingRequest, 'images' | 'bedrooms'> & { images: (File | string)[]; bedrooms: string | number }>({
     title: '',
     description: '',
     rent: 0,
-    bedrooms: 1,
+    bedrooms: '',
     bathrooms: 1,
     sqft: 0,
     address: '',
@@ -83,8 +84,12 @@ const Admin: React.FC = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'rent' || name === 'bedrooms' || name === 'bathrooms' || name === 'sqft' 
+      [name]: name === 'rent' || name === 'sqft' 
         ? parseInt(value) || 0 
+        : name === 'bedrooms'
+        ? value === '' ? '' : parseInt(value) || 0
+        : name === 'bathrooms'
+        ? parseFloat(value) || 0
         : value
     }));
   };
@@ -95,6 +100,8 @@ const Admin: React.FC = () => {
       images
     }));
   };
+
+
 
   const [editingListingId, setEditingListingId] = useState<string | null>(null);
 
@@ -130,6 +137,7 @@ const Admin: React.FC = () => {
       // Prepare listing data with image URLs
       const listingData = {
         ...formData,
+        bedrooms: typeof formData.bedrooms === 'string' ? parseInt(formData.bedrooms) || 0 : formData.bedrooms,
         images: imageUrls, // Replace File objects with URLs
       };
       
@@ -144,7 +152,7 @@ const Admin: React.FC = () => {
           title: '',
           description: '',
           rent: 0,
-          bedrooms: 1,
+          bedrooms: '',
           bathrooms: 1,
           sqft: 0,
           address: '',
@@ -170,7 +178,7 @@ const Admin: React.FC = () => {
           title: '',
           description: '',
           rent: 0,
-          bedrooms: 1,
+          bedrooms: '',
           bathrooms: 1,
           sqft: 0,
           address: '',
@@ -364,7 +372,7 @@ const Admin: React.FC = () => {
                       name="title"
                       value={formData.title}
                       onChange={(value) => setFormData(prev => ({ ...prev, title: value }))}
-                      placeholder="Modern Downtown Apartment"
+                      placeholder="Property Title"
                       required
                     />
                   </div>
@@ -375,15 +383,14 @@ const Admin: React.FC = () => {
                         Monthly Rent
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         id="rent"
                         name="rent"
                         value={formData.rent}
                         onChange={handleInputChange}
                         required
-                        min="0"
                         className="w-full px-4 py-3 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                        placeholder="2200"
+                        placeholder="Monthly Rent"
                       />
                     </div>
 
@@ -392,15 +399,14 @@ const Admin: React.FC = () => {
                         Square Feet
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         id="sqft"
                         name="sqft"
                         value={formData.sqft}
                         onChange={handleInputChange}
                         required
-                        min="0"
                         className="w-full px-4 py-3 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                        placeholder="950"
+                        placeholder="Square Feet"
                       />
                     </div>
                   </div>
@@ -411,14 +417,14 @@ const Admin: React.FC = () => {
                         Rooms
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         id="bedrooms"
                         name="bedrooms"
                         value={formData.bedrooms}
                         onChange={handleInputChange}
                         required
-                        min="1"
                         className="w-full px-4 py-3 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                        placeholder="Rooms"
                       />
                     </div>
 
@@ -427,15 +433,14 @@ const Admin: React.FC = () => {
                         Bathrooms
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         id="bathrooms"
                         name="bathrooms"
                         value={formData.bathrooms}
                         onChange={handleInputChange}
                         required
-                        min="1"
-                        step="0.5"
                         className="w-full px-4 py-3 border-2 border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                        placeholder="Bathrooms"
                       />
                     </div>
                   </div>
@@ -456,7 +461,7 @@ const Admin: React.FC = () => {
                       name="address"
                       value={formData.address}
                       onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
-                      placeholder="123 Main Street"
+                      placeholder="Street Address"
                       required
                     />
                   </div>
@@ -471,7 +476,7 @@ const Admin: React.FC = () => {
                         name="city"
                         value={formData.city}
                         onChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
-                        placeholder="New York"
+                        placeholder="City"
                         required
                       />
                     </div>
@@ -485,7 +490,7 @@ const Admin: React.FC = () => {
                         name="state"
                         value={formData.state}
                         onChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
-                        placeholder="NY"
+                        placeholder="State"
                         required
                       />
                     </div>
@@ -499,13 +504,15 @@ const Admin: React.FC = () => {
                         name="zipCode"
                         value={formData.zipCode}
                         onChange={(value) => setFormData(prev => ({ ...prev, zipCode: value }))}
-                        placeholder="10001"
+                        placeholder="ZIP Code"
                         required
                       />
                     </div>
                   </div>
                 </div>
               </div>
+
+
 
               {/* Description Section */}
               <div className="space-y-4">
@@ -518,7 +525,7 @@ const Admin: React.FC = () => {
                   <TranslatableTextarea
                     value={formData.description}
                     onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
-                    placeholder="Describe the property features, amenities, and highlights..."
+                    placeholder="Property Description"
                     rows={4}
                     required
                   />

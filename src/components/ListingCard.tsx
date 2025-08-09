@@ -55,7 +55,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
           <div className="flex items-center space-x-4 text-sm text-gray-600">
             <span className="flex items-center">
               <span className="mr-1">🛏️</span>
-              {listing.bedrooms} room{listing.bedrooms !== 1 ? 's' : ''}
+              {listing.bedrooms === 0 ? 'Studio' : `${listing.bedrooms} room${listing.bedrooms !== 1 ? 's' : ''}`}
             </span>
             <span className="flex items-center">
               <span className="mr-1">🚿</span>

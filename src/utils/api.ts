@@ -198,4 +198,27 @@ export const api = {
     const data = await response.json();
     return data.translation;
   },
+
+  // AI Description Enhancement
+  async enhanceDescription(text: string, propertyType?: string): Promise<string> {
+    console.log('✨ enhanceDescription called with:', text.substring(0, 100) + '...');
+    
+    const response = await fetch(`${API_BASE_URL}/enhance-description`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text, propertyType }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to enhance description');
+    }
+    
+    const data = await response.json();
+    return data.enhancedDescription;
+  },
+
+
 }; 
